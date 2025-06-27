@@ -11,7 +11,7 @@ load_dotenv()
 TG_TOKEN = os.getenv("TG_TOKEN")
 TG_CHAT_ID = os.getenv("TG_CHAT_ID")
 
-# List of product URLs
+# Product URLs
 PRODUCT_URLS = {
     "Amul Protein Buttermilk": "https://www.amazon.in/Amul-Protein-Buttermilk-protein-8x200mL/dp/B09RV8YWWT"
 }
@@ -29,11 +29,10 @@ def check_stock():
                 message = f"✅ {product_name} is back in stock!\n{url}"
             else:
                 message = f"❌ {product_name} still out of stock."
-
             print(message)
             send_telegram(message)
         except Exception as e:
-            print(f"Error checking stock: {e}")
+            print(f"Error: {e}")
             send_telegram(f"⚠️ Error checking {product_name}: {e}")
 
 def send_telegram(message):
@@ -45,25 +44,26 @@ def send_telegram(message):
     try:
         response = requests.post(url, data=payload)
         if response.status_code != 200:
-            print(f"❌ Failed to send message: {response.text}")
+            print(f"Telegram error: {response.text}")
     except Exception as e:
-        print(f"❌ Telegram send error: {e}")
+        print(f"Telegram send failed: {e}")
 
-# Background loop
-def run_bot():
+def bot_loop():
     while True:
         check_stock()
-        time.sleep(300)  # check every 5 mins
+        time.sleep(300)  # 5 mins
 
-# Dummy Flask server to satisfy Render
+# Flask app to satisfy Render
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Bot is running!"
+    return "Bot is alive!"
 
+if __name__ == "__main__":
+    # Start the stock checker in the background
+    threading.Thread(target=bot_loop, daemon=True).start()
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # use Render's assigned port
-    threading.Thread(target=run_bot).start()
+    # Start Flask on Render-assigned port
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
