@@ -72,7 +72,7 @@ def send_telegram(message):
 def bot_loop():
     while True:
         check_stock()
-        time.sleep(43200)  # 12 hours = 43200 seconds
+        time.sleep(1800)  # 12 hours = 43200 seconds
 
 # 🌐 Flask app to keep Render alive
 app = Flask(__name__)
